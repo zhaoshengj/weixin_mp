@@ -1,54 +1,91 @@
-//index.js
+const util = require('../../utils/util.js');
+const api = require('../../config/api.js');
+const user = require('../../services/user.js');
+
 //获取应用实例
 const app = getApp()
-
 Page({
   data: {
-    motto: 'Hello World',
-    userInfo: {},
-    hasUserInfo: false,
-    canIUse: wx.canIUse('button.open-type.getUserInfo')
+    newGoods: [],
+    hotGoods: [],
+    topics: [],
+    brands: [],
+    floorGoods: [],
+    banner: [],
+    channel: []
   },
-  //事件处理函数
-  bindViewTap: function() {
-    wx.navigateTo({
-      url: '../logs/logs'
-    })
-  },
-  onLoad: function () {
-    if (app.globalData.userInfo) {
-      this.setData({
-        userInfo: app.globalData.userInfo,
-        hasUserInfo: true
-      })
-    } else if (this.data.canIUse){
-      // 由于 getUserInfo 是网络请求，可能会在 Page.onLoad 之后才返回
-      // 所以此处加入 callback 以防止这种情况
-      app.userInfoReadyCallback = res => {
-        this.setData({
-          userInfo: res.userInfo,
-          hasUserInfo: true
-        })
-      }
-    } else {
-      // 在没有 open-type=getUserInfo 版本的兼容处理
-      wx.getUserInfo({
-        success: res => {
-          app.globalData.userInfo = res.userInfo
-          this.setData({
-            userInfo: res.userInfo,
-            hasUserInfo: true
-          })
-        }
-      })
+  onShareAppMessage: function () {
+    return {
+      title: 'NideShop',
+      desc: '仿网易严选微信小程序商城',
+      path: '/pages/index/index'
     }
+  },onPullDownRefresh(){
+	  	// 增加下拉刷新数据的功能
+	    var self = this;
+	    this.getIndexData();
+ },
+  getIndexData: function () {
+    let that = this;
+    var data = new Object();
+    util.request(api.IndexUrlNewGoods).then(function (res) {
+      if (res.errno === 0) {
+        data.newGoods= res.data.newGoodsList
+      that.setData(data);
+      }
+    });
+    util.request(api.IndexUrlHotGoods).then(function (res) {
+      if (res.errno === 0) {
+        data.hotGoods = res.data.hotGoodsList
+      that.setData(data);
+      }
+    });
+    util.request(api.IndexUrlTopic).then(function (res) {
+      if (res.errno === 0) {
+        data.topics = res.data.topicList
+      that.setData(data);
+      }
+    });
+    util.request(api.IndexUrlBrand).then(function (res) {
+      if (res.errno === 0) {
+        data.brand = res.data.brandList
+      that.setData(data);
+      }
+    });
+    util.request(api.IndexUrlCategory).then(function (res) {
+      if (res.errno === 0) {
+        data.floorGoods = res.data.categoryList
+      that.setData(data);
+      }
+    });
+    util.request(api.IndexUrlBanner).then(function (res) {
+
+      if (res.errno === 0) {
+        data.banner = res.data.banner
+      that.setData(data);
+      }
+    });
+    util.request(api.IndexUrlChannel).then(function (res) {
+      if (res.errno === 0) {
+        data.channel = res.data.channel
+      that.setData(data);
+      }
+    });
+
   },
-  getUserInfo: function(e) {
-    console.log(e)
-    app.globalData.userInfo = e.detail.userInfo
-    this.setData({
-      userInfo: e.detail.userInfo,
-      hasUserInfo: true
-    })
-  }
+  onLoad: function (options) {
+    this.getIndexData();
+  },
+  onReady: function () {
+    // 页面渲染完成
+  },
+  onShow: function () {
+    // 页面显示
+  },
+  onHide: function () {
+    // 页面隐藏
+  },
+  onUnload: function () {
+    // 页面关闭
+  },
 })
